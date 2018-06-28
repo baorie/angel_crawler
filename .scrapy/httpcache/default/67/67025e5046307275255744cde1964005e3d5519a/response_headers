@@ -1,0 +1,16 @@
+Cache-Control: max-age=0, private, must-revalidate
+Content-Encoding: gzip
+Content-Type: text/html; charset=utf-8
+Date: Thu, 28 Jun 2018 15:23:35 GMT
+Etag: W/"caaaffc8b4d2bd87b6ca6250683f1c3f"
+Server: nginx
+Set-Cookie: _angellist=e4b93a01b3aaf1745662060e4bafd43e; path=/; expires=Thu, 26 Jul 2018 15:23:35 -0000; secure; HttpOnly
+Strict-Transport-Security: max-age=631152000
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Process: ip-10-234-150-228 28636
+X-Request-Id: bc2b9f1d-e868-438f-9499-a608587eba1f
+X-Runtime: 0.424609
+X-Thanks: For using AngelList. Rock on!
+X-Xss-Protection: 1; mode=block
