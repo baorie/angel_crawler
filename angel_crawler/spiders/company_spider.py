@@ -1,37 +1,40 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import os
+from scrapy_splash import SplashRequest
 
-class CompanySpiderSpider(scrapy.Spider):
+class CompanySpider(scrapy.Spider):
     name = 'company_spider'
-    login_url = 'http://angel.co/login'
-    start_urls = [login_url]
+    
+    # custom_settings = {
+    #     'SPLASH_URL': 'http://localhost:8050',
+    #     'DOWNLOADER_MIDDLEWARES': {
+    #         'scrapy_splash.SplashCookiesMiddleware': 723,
+    #         'scrapy_splash.SplashMiddleware': 725,
+    #         'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+    #     }
+    #     'SPIDER_MIDDLEWARES': {
+    #         'scrapy_splash.SplashDeduplicateArgsMiddleware': 810,
+    #     }
+    #     'DUPEFILTER_CLASS': 'scrapy_splash.SplashAwareDupeFilter',
+    # }
+
+    def start_requests(self):
+        yield SplashRequest(
+            url='https://angel.co/companies?locations[]=1688-United+States&tab=hiring&stage[]=Series+A&stage[]=Series+B&stage[]=Series+C',
+            callback=self.parse,
+        )
 
     def parse(self, response):
-        # extract the csrf token value
-        token = response.css('meta[name="csrf-token"]::attr(content)').extract_first()
-        # create a python dictionary with the form values
-        data = {
-            'csrf-token' : token,
-            'user_email': os.environ.get('ANGEL_EMAIL'),
-            'password': os.environ.get('ANGEL_PASS'),
-        }
-        # submit a POST request to it
-        yield scrapy.FormRequest(url=self.login_url, formdata=data, callback=self.parse_jobs)
-
-    def parse_jobs(self, response):
-        # parse the job page after the spider is logged in
-        job_page_url = 'https://angel.co/jobs#find/f!%7B{}%7D'
-        # change the double quotes to %22 later if you need to
-        city_url = job_page_url.format("locations"%3A%5B"1664-New York City%2C NY"%5D)
-        # for each company in the company listing
-        for c in response.css('div.fbw9'):
-            item = {
-                'company_name': c.css('a.startup-link::text').extract_first(),
-                'company_profile': c.css('div.tagline::text').extract_first(),
-                # create expandable array of jobs w job_title and job_profile
-                'job_title': c.css('div.listing-row div.top div.title a[target=_blank]::text').extract(),
-                'job_profile': c.css('div.listing-row div.top div.tags::text').extract(),
+        self.log('I just visited: ' + response.url)
+        for entry in response.css('div.base.startup'):
+            yield {
+                'company': entry.css('a.startup-link::text').extract_first(),
+                'pitch': entry.css('div.pitch::text').extract_first(), 
+                'location': entry.css('div.column.location div.value div.tag a::text').extract_first(),
+                'market': entry.css('div.column.market div.value div.tag a::text').extract_first(), 
+                'website': entry.css('div.column.website div.value div.website a::attr(href)').extract_first(), 
+                'employees': entry.css('div.column.company_size div.value::text').extract_first(), 
+                'stage': entry.css('div.column.stage div.value::text').extract_first(),
+                'total_raised': entry.css('div.column.raised div.value::text').extract_first(),
             }
-            yield item
-            # incorporate JavaScript
+
